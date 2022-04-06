@@ -1,0 +1,17 @@
+{
+  "name": "employee-managment-tracker",
+  "version": "",
+  "description": "Terminal application to view and manage the departments, roles, and employees in a company",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm start"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1"
+  },
+  "dependencies": {
+    "inquirer": "^8.2.2",
+    "mysql2": "^2.3.3"
+  }
+}
