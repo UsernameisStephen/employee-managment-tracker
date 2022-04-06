@@ -1,12 +1,27 @@
-DROP DATABASE IF EXISTS course_db;
-CREATE DATABASE course_db;
+DROP DATABASE IF EXISTS employee_db;
+CREATE DATABASE employee_db;
+USE EMPLOYEE_DB;
 
-USE course_db;
-
-CREATE TABLE courses (
-  id INT NOT NULL,
-  course_title VARCHAR(30) NOT NULL,
-  course_description TEXT NOT NULL,
-  active BOOLEAN NOT NULL,
-  date_updated DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+CREATE TABLE employee (
+	id INT NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL, 
+    role_id INT NOT NULL,
+    PRIMARY KEY(id)
 );
+
+CREATE TABLE employee_role (
+	id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(30) NOT NULL,
+    salary DECIMAL(10, 0) NOT NULL,
+    department_id int NOT NULL,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE department (
+	id INT NOT NULL AUTO_INCREMENT,
+    department_name VARCHAR(30) NOT NULL,
+    PRIMARY KEY(id)
+);
+
+SELECT Math FROM department
