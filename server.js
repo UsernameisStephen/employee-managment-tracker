@@ -53,6 +53,7 @@ async function choicePrompt() {
           break;
     }
 }
+exports.choicePrompt = choicePrompt;
 
 function viewEmployee() {
     console.log("Viewing employees\n");
@@ -67,14 +68,14 @@ function viewEmployee() {
     LEFT JOIN employee m
     ON m.id = e.manager_id`
    
-    connection.query(query, function (err, res) {
-        if (err) throw err;
-    
-        console.table(res);
-        console.log("Employees viewed!\n");
-    
-        choicePrompt();
-    });
+        connection.query(query, (err, result) => {
+            if (err) throw err;
+
+            console.table(result);
+            console.log("Employees viewed!\n");
+
+            choicePrompt();    
+        });
     
 }
 
@@ -90,7 +91,7 @@ function viewEmployeeByDepartment() {
     ON d.id = r.department_id
     GROUP BY d.id, d.name`
   
-    connection.query(query, function (err, result) {
+    connection.query(query, (err, result) => {
       if (err) throw err;
   
       const departmentChoices = result.map(data => ({
@@ -115,7 +116,7 @@ function promptDepartment(departmentChoices) {
           choices: departmentChoices
         }
       ])
-      .then(function (answer) {
+      .then( (answer) => {
         console.log("answer ", answer.departmentId);
   
         let query =
@@ -127,25 +128,26 @@ function promptDepartment(departmentChoices) {
         ON d.id = r.department_id
         WHERE d.id = ?`
   
-        connection.query(query, answer.departmentId, function (err, result) {
+        connection.query(query, answer.departmentId, (err, result) => {
           if (err) throw err;
   
           console.table("response ", result);
-          console.log(result.affectedRows + "Employees are viewed!\n");
+          console.log(`${result.affectedRows}Employees are viewed!\n`);
   
           choicePrompt();
         });
-      });
+    });
 }
 
 function addEmployee() {
     console.log("Adding an employee!")
   
-    var query =
-      `SELECT r.id, r.title, r.salary 
-        FROM role r`
+    const newLocal = `SELECT r.id, r.title, r.salary 
+        FROM role r`;
+    let query =
+      newLocal
   
-    connection.query(query, function (err, result) {
+    connection.query(query, (err, result) => {
       if (err) throw err;
   
       const roleChoices = result.map(({ id, title, salary }) => ({
@@ -157,5 +159,96 @@ function addEmployee() {
   
       promptAddEmployee(roleChoices);
     });
+}
+  
+function promptAddEmployee(roleChoices) {
+
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "first_name",
+          message: "What is the employee's first name?"
+        },
+        {
+          type: "input",
+          name: "last_name",
+          message: "What is the employee's last name?"
+        },
+        {
+          type: "list",
+          name: "roleId",
+          message: "What is the employee's role?",
+          choices: roleChoices
+        },
+      ])
+      .then( (answer) => {
+        console.log(answer);
+  
+        let query = `INSERT INTO employee SET ?`
+        connection.query(query,
+          {
+            first_name: answer.first_name,
+            last_name: answer.last_name,
+            role_id: answer.roleId,
+            manager_id: answer.managerId,
+          },
+            (err, result) => {
+            if (err) throw err;
+  
+            console.table(result);
+            console.log(`${result.insertedRows}Successfully Inserted!\n`);
+  
+            choicePrompt();
+        });
+    });
+}
+
+function removeEmployees() {
+    console.log("Delete an employee");
+  
+    let query =
+      `SELECT e.id, e.first_name, e.last_name
+        FROM employee e`
+  
+    connection.query(query, (err, result) => {
+            if (err)
+                throw err;
+
+            const deleteEmployeeChoices = res.map(({ id, first_name, last_name }) => ({
+                value: id, name: `${id} ${first_name} ${last_name}`
+            }));
+
+            console.table(result);
+            console.log("ArrayToDelete!\n");
+
+            promptDelete(deleteEmployeeChoices);
+        });
+}
+  
+function promptDelete(deleteEmployeeChoices) {
+  
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employeeId",
+          message: "Which employee do you want to remove?",
+          choices: deleteEmployeeChoices
+        }
+      ])
+      .then((answer) => {
+
+              var query = `DELETE FROM employee WHERE ?`;
+              connection.query(query, { id: answer.employeeId }, function (err, result) {
+                  if (err)
+                      throw err;
+
+                  console.table(result);
+                  console.log(`${result.affectedRows}Deleted!\n`);
+
+                  choicePrompt();
+              });
+          });
 }
   
