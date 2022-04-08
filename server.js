@@ -21,7 +21,7 @@ const questions = [
 ]
 
 
-async function choicePrompt() {
+async function firstChoicePrompt() {
     const result = await inquirer.prompt(questions);
     switch (result.task) {
         case "View Employees":
@@ -53,7 +53,7 @@ async function choicePrompt() {
           break;
     }
 }
-exports.choicePrompt = choicePrompt;
+exports.firstChoicePrompt = firstChoicePrompt;
 
 function viewEmployee() {
     console.log("Viewing employees\n");
@@ -74,7 +74,7 @@ function viewEmployee() {
             console.table(result);
             console.log("Employees viewed.\n");
 
-            choicePrompt();    
+            firstChoicePrompt();    
         });
     
 }
@@ -94,18 +94,18 @@ function viewEmployeeByDepartment() {
     connection.query(query, (err, result) => {
       if (err) throw err;
   
-      const departmentChoices = result.map(data => ({
+      const depChoice = result.map(data => ({
         value: data.id, name: data.name
       }));
   
       console.table(result);
       console.log("Department view succeed.\n");
   
-      promptDepartment(departmentChoices);
+      promptDepartment(depChoice);
     });
 }
 
-function promptDepartment(departmentChoices) {
+function promptDepartment(depChoice) {
 
     inquirer
       .prompt([
@@ -113,7 +113,7 @@ function promptDepartment(departmentChoices) {
           type: "list",
           name: "departmentId",
           message: "Which department would you choose?",
-          choices: departmentChoices
+          choices: depChoice
         }
       ])
       .then( (answer) => {
@@ -134,7 +134,7 @@ function promptDepartment(departmentChoices) {
           console.table("response ", result);
           console.log(`${result.affectedRows}Employees are viewed.\n`);
   
-          choicePrompt();
+          firstChoicePrompt();
         });
     });
 }
@@ -199,7 +199,7 @@ function promptAddEmployee(roleChoices) {
             console.table(result);
             console.log(`${result.insertedRows}Successfully Inserted.\n`);
   
-            choicePrompt();
+            firstChoicePrompt();
         });
     });
 }
@@ -247,7 +247,7 @@ function promptDelete(deleteEmployeeChoices) {
                   console.table(result);
                   console.log(`${result.affectedRows}Deleted\n`);
 
-                  choicePrompt();
+                  firstChoicePrompt();
               });
           });
 }
@@ -270,19 +270,20 @@ function updateEmployeeRole() {
     JOIN employee m
       ON m.id = e.manager_id`
   
-    connection.query(query, function (err, result) {
-      if (err) throw err;
-  
-      const employeeChoices = result.map(({ id, first_name, last_name }) => ({
-        value: id, name: `${first_name} ${last_name}`      
-      }));
-  
-      console.table(result);
-      console.log("employeeArray To Update.\n")
-  
-      roleArray(employeeChoices);
-    });
-  }
+    connection.query(query, (err, result) => {
+        if (err)
+          throw err;
+
+        const employeeChoices = result.map(({ id, first_name, last_name }) => ({
+          value: id, name: `${first_name} ${last_name}`
+        }));
+
+        console.table(result);
+        console.log("employeeArray To Update.\n");
+
+        roleArray(employeeChoices);
+      });
+}
   
   function roleArray(employeeChoices) {
     console.log("Updating an role");
@@ -305,7 +306,7 @@ function updateEmployeeRole() {
 
             promptEmployeeRole(employeeChoices, roleChoices);
         });
-  }
+}
   
 function promptEmployeeRole(employeeChoices, roleChoices) {
   
@@ -338,7 +339,86 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
               console.table(result);
               console.log(`${result.affectedRows}Successfully Updated.`);
 
-              firstPrompt();
+              firstChoicePrompt();
           });
       });
-  }
+}
+
+function addRole() {
+
+  let query =
+    `SELECT d.id, d.name, r.salary AS budget
+    FROM employee e
+    JOIN role r
+    ON e.role_id = r.id
+    JOIN department d
+    ON d.id = r.department_id
+    GROUP BY d.id, d.name`
+
+  connection.query(query, (err, result) => {
+      if (err)
+        throw err;
+      const depChoice = result.map(({ id, name }) => ({
+        value: id, name: `${id} ${name}`
+      }));
+
+      console.table(result);
+      console.log("Department array!");
+
+      promptAddRole(depChoice);
+    });
+}
+
+function promptAddRole(depChoice) {
+
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "roleTitle",
+        message: "Role title?"
+      },
+      {
+        type: "input",
+        name: "roleSalary",
+        message: "Role Salary"
+      },
+      {
+        type: "list",
+        name: "departmentId",
+        message: "Department?",
+        choices: depChoice
+      },
+    ])
+    .then((answer) => {
+
+        let query = `INSERT INTO role SET ?`;
+
+        connection.query(query, {
+          title: answer.title,
+          salary: answer.salary,
+          department_id: answer.departmentId
+        },
+          (err, result) => {
+            if (err)
+              throw err;
+
+            console.table(result);
+            console.log("Role Inserted!");
+
+            FirstChoicePrompt();
+          });
+
+      });
+}
+
+console.table(
+  "\n------------ EMPLOYEE TRACKER ------------\n"
+)
+
+let connection = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "simplepassword",
+    database: "employee_db"
+}); 
