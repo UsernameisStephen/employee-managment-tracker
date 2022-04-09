@@ -32,7 +32,7 @@ VALUES ("Earn", "Marks", 3, null);
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES ("Steve", "E", 4, 3);
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES ("Leen", "Hurst", 5, null);
+VALUES ("Tony", "Di Blasi", 5, null);
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES ("Robbie", "Chater", 2, null);
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
