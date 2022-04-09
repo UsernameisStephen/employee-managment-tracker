@@ -22,8 +22,8 @@ const questions = [
 
 
 async function firstChoicePrompt() {
-    const result = await inquirer.prompt(questions);
-    switch (result.task) {
+    const res = await inquirer.prompt(questions);
+    switch (res.task) {
         case "View Employees":
           viewEmployee();
           break;
@@ -68,10 +68,10 @@ function viewEmployee() {
     LEFT JOIN employee m
     ON m.id = e.manager_id`
    
-        connection.query(query, (err, result) => {
+        connection.query(query, (err, res) => {
             if (err) throw err;
 
-            console.table(result);
+            console.table(res);
             console.log("Employees viewed.\n");
 
             firstChoicePrompt();    
@@ -91,14 +91,14 @@ function viewEmployeeByDepartment() {
     ON d.id = r.department_id
     GROUP BY d.id, d.name`
   
-    connection.query(query, (err, result) => {
+    connection.query(query, (err, res) => {
       if (err) throw err;
   
-      const depChoice = result.map(data => ({
+      const depChoice = res.map(data => ({
         value: data.id, name: data.name
       }));
   
-      console.table(result);
+      console.table(res);
       console.log("Department view succeed.\n");
   
       promptDepartment(depChoice);
@@ -106,7 +106,6 @@ function viewEmployeeByDepartment() {
 }
 
 function promptDepartment(depChoice) {
-
     inquirer
       .prompt([
         {
@@ -128,11 +127,11 @@ function promptDepartment(depChoice) {
         ON d.id = r.department_id
         WHERE d.id = ?`
   
-        connection.query(query, answer.departmentId, (err, result) => {
+        connection.query(query, answer.departmentId, (err, res) => {
           if (err) throw err;
   
-          console.table("response ", result);
-          console.log(`${result.affectedRows}Employees are viewed.\n`);
+          console.table("response ", res);
+          console.log(`${res.affectedRows}Employees are viewed.\n`);
   
           firstChoicePrompt();
         });
@@ -147,14 +146,14 @@ function addEmployee() {
     let query =
       newLocal
   
-    connection.query(query, (err, result) => {
+    connection.query(query, (err, res) => {
       if (err) throw err;
   
-      const roleChoices = result.map(({ id, title, salary }) => ({
+      const roleChoices = res.map(({ id, title, salary }) => ({
         value: id, title: `${title}`, salary: `${salary}`
       }));
   
-      console.table(result);
+      console.table(res);
       console.log("Role Added.");
   
       promptAddEmployee(roleChoices);
@@ -193,11 +192,11 @@ function promptAddEmployee(roleChoices) {
             role_id: answer.roleId,
             manager_id: answer.managerId,
           },
-            (err, result) => {
+            (err, res) => {
             if (err) throw err;
   
-            console.table(result);
-            console.log(`${result.insertedRows}Successfully Inserted.\n`);
+            console.table(res);
+            console.log(`${res.insertedRows}Successfully Inserted.\n`);
   
             firstChoicePrompt();
         });
@@ -211,7 +210,7 @@ function removeEmployees() {
       `SELECT e.id, e.first_name, e.last_name
         FROM employee e`
   
-    connection.query(query, (err, result) => {
+    connection.query(query, (err, res) => {
             if (err)
                 throw err;
 
@@ -219,7 +218,7 @@ function removeEmployees() {
                 value: id, name: `${id} ${first_name} ${last_name}`
             }));
 
-            console.table(result);
+            console.table(res);
             console.log("ArrayToDelete.\n");
 
             promptDelete(deleteEmployeeChoices);
@@ -240,12 +239,12 @@ function promptDelete(deleteEmployeeChoices) {
       .then((answer) => {
 
               let query = `DELETE FROM employee WHERE ?`;
-              connection.query(query, { id: answer.employeeId }, function (err, result) {
+              connection.query(query, { id: answer.employeeId }, function (err, res) {
                 if (err)
                 throw err;
 
-                  console.table(result);
-                  console.log(`${result.affectedRows}Deleted\n`);
+                  console.table(res);
+                  console.log(`${res.affectedRows}Deleted\n`);
 
                   firstChoicePrompt();
               });
@@ -270,15 +269,15 @@ function updateEmployeeRole() {
     JOIN employee m
       ON m.id = e.manager_id`
   
-    connection.query(query, (err, result) => {
+    connection.query(query, (err, res) => {
         if (err)
           throw err;
 
-        const employeeChoices = result.map(({ id, first_name, last_name }) => ({
+        const employeeChoices = res.map(({ id, first_name, last_name }) => ({
           value: id, name: `${first_name} ${last_name}`
         }));
 
-        console.table(result);
+        console.table(res);
         console.log("employeeArray To Update.\n");
 
         roleArray(employeeChoices);
@@ -293,15 +292,15 @@ function updateEmployeeRole() {
         FROM role r`
     let roleChoices;
   
-    connection.query(query, (err, result) => {
+    connection.query(query, (err, res) => {
             if (err)
             throw err;
 
-            roleChoices = result.map(({ id, title, salary }) => ({
+            roleChoices = res.map(({ id, title, salary }) => ({
             value: id, title: `${title}`, salary: `${salary}`
             }));
 
-            console.table(result);
+            console.table(res);
             console.log("roleArray to Update!\n");
 
             promptEmployeeRole(employeeChoices, roleChoices);
@@ -332,12 +331,12 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
           [ answer.roleId,  
             answer.employeeId
           ],
-          (err, result) => {
+          (err, res) => {
               if (err)
                 throw err;
 
-              console.table(result);
-              console.log(`${result.affectedRows}Successfully Updated.`);
+              console.table(res);
+              console.log(`${res.affectedRows}Successfully Updated.`);
 
               firstChoicePrompt();
           });
@@ -355,14 +354,14 @@ function addRole() {
     ON d.id = r.department_id
     GROUP BY d.id, d.name`
 
-  connection.query(query, (err, result) => {
+  connection.query(query, (err, res) => {
       if (err)
         throw err;
-      const depChoice = result.map(({ id, name }) => ({
+      const depChoice = res.map(({ id, name }) => ({
         value: id, name: `${id} ${name}`
       }));
 
-      console.table(result);
+      console.table(res);
       console.log("Department array!");
 
       promptAddRole(depChoice);
@@ -399,11 +398,11 @@ function promptAddRole(depChoice) {
           salary: answer.salary,
           department_id: answer.departmentId
         },
-          (err, result) => {
+          (err, res) => {
             if (err)
               throw err;
 
-            console.table(result);
+            console.table(res);
             console.log("Role Inserted!");
 
             FirstChoicePrompt();
